@@ -19,7 +19,7 @@ Dockerized OpenManage, built on top of [official CentOS](https://registry.hub.do
 ## Run example
 
 ```bash
-$ docker run --privileged -d -p 1311:1311 --restart=always \
+$ docker run --privileged -d -p 1311:1311 -p 161:161/udp --restart=always \
    -v /lib/modules/`uname -r`:/lib/modules/`uname -r` \
    --name=omsa81 jdelaros1/openmanage:latest
 ```
@@ -28,6 +28,10 @@ Once the container starts, give it about 20-25 seconds for all the OpenManage se
 
 From the CLI, you can run something like `docker exec omsa81 omreport system summary` or use a browser to go to https://your-server-ip:1311 and use login credentials listed above.
 
+To test the snmp Daemon you can try reading the storage OIDs
+```bash
+$ snmpwalk -On -c public -v2c your-server-ip .1.3.6.1.4.1.674.10893.1.20.130.5.1
+```
 ## Known Issues
 
   - NIC and MAC information is not displayed.
