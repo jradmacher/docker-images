@@ -17,7 +17,7 @@ RUN wget -q -O - http://linux.dell.com/repo/hardware/dsu/bootstrap.cgi | bash
 RUN yum -y install srvadmin-all
 
 # Fix storage recognition
-#RUN sed -i -e 's/\x00release_date\x00/\x00version\x00\x00\x00\x00\x00\x00/' /opt/dell/srvadmin/lib64/libstorelib.so.4.20.1-0
+RUN sed -i -e 's/\x00release_date\x00/\x00version\x00\x00\x00\x00\x00\x00/' /opt/dell/srvadmin/lib64/libstorelib.so.4.39-0
 
 # Add to PATH
 ENV PATH $PATH:/opt/dell/srvadmin/bin:/opt/dell/srvadmin/sbin
