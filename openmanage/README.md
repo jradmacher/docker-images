@@ -5,6 +5,7 @@ Dockerized OpenManage, built on top of [official CentOS](https://registry.hub.do
 ## Configuration
 
   - container has to run in privilged mode so that the host hardware can be exposed to it.
+  - to prevent device drivers from being built via DKS (Dynamic Kernel Support) we fool OMSA into thinking we're running in RHEL 7 (not CentOS 7), so the OS information reported by OMSA will be RHEL 7 (refer to the Dockerfile).
   - default command: `/opt/dell/srvadmin/sbin/srvadmin-services.sh restart` so that services can start cleanly in case container is stopped and then restarted.
   - login credentials: root / password
 
@@ -34,8 +35,7 @@ $ snmpwalk -On -c public -v2c your-server-ip .1.3.6.1.4.1.674.10893.1.20.130.5.1
 ```
 ## Known Issues
 
-  - NIC and MAC information is not displayed.
-  - The OS information provided is what's in the container, not in the host.
+  - IP and MAC information in network controllers is not available.
 
 ## Support
 
