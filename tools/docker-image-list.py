@@ -115,8 +115,9 @@ def main():
       print red + "System check failed, please correct and try again." + end
       sys.exit(1)
 
-   if len(sys.argv) > 1:
-      if sys.argv[1] == "-s": list_prnt = ["image", "tag", "id"]
+   #if len(sys.argv) > 1:
+   #   if sys.argv[1] == "-l":		# can customize displayed fields
+   #      list_prnt = ["image", "tag", "id", "size", "created"]
 
    s = "docker images"
    try:
@@ -124,7 +125,8 @@ def main():
       out = p.stdout.read().strip()
    except KeyboardInterrupt:
       die("Interrupt detected, exiting.")
-   except: raise
+   except:
+      die("Another Docker operation is running...try again in 2 secs...'")
 
    for line in out.split("\n")[1:]:             # skip first line
       im = {}
@@ -146,4 +148,3 @@ def main():
 if __name__ == "__main__":
    main()
 
-# 2015.08.19 17:39:50 - JD

@@ -1,26 +1,35 @@
 # Use CentOS 7 base image from Docker Hub
 FROM centos:centos7
-MAINTAINER Jose De la Rosa "https://github.com/jose-delarosa" 
+MAINTAINER Jose De la Rosa "https://github.com/jose-delarosa"
+
+# Environment variables
+ENV PATH $PATH:/opt/dell/srvadmin/bin:/opt/dell/srvadmin/sbin
+ENV TOMCATCFG /opt/dell/srvadmin/lib64/openmanage/apache-tomcat/conf/server.xml
+ENV USER root
+ENV PASS password
 
 # Do overall update and install missing packages needed for OpenManage
-RUN yum -y update
-RUN yum -y install gcc wget perl passwd which tar net-snmp
-RUN yum -y install libstdc++.so.6 compat-libstdc++-33.i686 glibc.i686
+RUN yum -y update && \
+    yum -y install gcc wget perl passwd which tar libstdc++.so.6 compat-libstdc++-33.i686 glibc.i686 \
+        net-snmp
 
 # Set login credentials
-RUN echo 'root:password' | chpasswd
+RUN echo "$USER:$PASS" | chpasswd
 
-# Define OMSA repo
+# Add OMSA repo
 RUN wget -q -O - http://linux.dell.com/repo/hardware/latest/bootstrap.cgi | bash
 
-# Install all but we could select specific components to reduce image size
-RUN yum -y install srvadmin-all
+# Let's "install all", however we can select specific components instead
+RUN yum -y install srvadmin-all && yum clean all
 
 # Fix storage recognition
 RUN sed -i -e 's/\x00release_date\x00/\x00version\x00\x00\x00\x00\x00\x00/' /opt/dell/srvadmin/lib64/libstorelib.so.4.20.1-0
 
-# Add to PATH
-ENV PATH $PATH:/opt/dell/srvadmin/bin:/opt/dell/srvadmin/sbin
+# Replace weak Diffie-Hellman ciphers with Elliptic-Curve Diffie-Hellman
+RUN sed -i -e 's/SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA/TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256/' -e 's/TLS_DHE_RSA_WITH_AES_128_CBC_SHA/TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA/' -e 's/TLS_DHE_DSS_WITH_AES_128_CBC_SHA/TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384/' -e 's/SSL_DHE_DSS_WITH_3DES_EDE_CBC_SHA/TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA/' $TOMCATCFG
+
+# Prevent daemon helper scripts from making systemd calls
+ENV SYSTEMCTL_SKIP_REDIRECT=1
 
 # Fix insecure default webserver settings
 RUN omconfig preferences webserver attribute=sslencryption setting=autonegotiate
